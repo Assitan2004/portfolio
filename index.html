@@ -604,7 +604,6 @@
         }
 
         @media (max-width: 768px) {
-            .nav-links { display: none; }
             .home-content h1 { font-size: 2.8rem; }
             .home-img img { width: 300px; }
             .home-section { text-align: center; justify-content: center; }
@@ -1132,7 +1131,7 @@ footer {
 }
 
 /* Affiche au clic ou survol (tu peux choisir) */
-.lang-dropdown:hover .dropdown-content {
+.lang-dropdown.open .dropdown-content {
     display: block;
 }
 /* --- AJOUTS ET MODIFICATIONS CSS --- */
@@ -1274,33 +1273,64 @@ footer {
 
 @media (max-width: 1024px) {
     .menu-toggle {
-        display: block; /* Affiche le bouton sur mobile/tablette */
+        display: block;
     }
 
     .nav-links {
+        display: flex; /* ← clé du problème */
         position: fixed;
         top: 0;
-        right: -100%; /* Menu caché à droite */
+        right: -100%;
         width: 70%;
         height: 100vh;
         background: rgba(10, 4, 22, 0.95);
         backdrop-filter: blur(20px);
         flex-direction: column;
         justify-content: center;
+        align-items: center;
         gap: 30px;
         transition: 0.4s ease;
         border-left: 1px solid var(--border-glow);
+        z-index: 999;
     }
 
-    /* Quand le menu est ouvert */
     .nav-links.active {
         right: 0;
     }
+    /* FIX PROJETS MOBILE */
+    .projects-section .sub-title {
+        position: relative;
+        top: auto;
+        padding: 40px 5% 20px;
+    }
 
-    /* On cache le dropdown de langue dans le menu mobile pour gagner de la place 
-       ou on le stylise différemment */
-    .lang-dropdown {
-        margin-top: 10px;
+    .sticky-wrapper {
+        position: relative;
+        height: auto;
+        overflow: visible;
+    }
+
+   
+ .projects-horizontal-container {
+    flex-direction: column;
+    width: 100%;
+    padding: 20px 5%;
+    gap: 25px;
+    align-items: center;
+}
+    .project-card {
+        width: 100% !important;
+    }
+}
+@media (min-width: 1025px) {
+    .nav-links {
+        position: static !important;
+        width: auto !important;
+        height: auto !important;
+        background: transparent !important;
+        border-left: none !important;
+        flex-direction: row !important;
+        right: auto !important;
     }
 }
     </style>
@@ -1324,7 +1354,6 @@ footer {
         <li><a href="#experience"><i class="fas fa-history"></i> Parcours</a></li>
         <li><a href="#projects"><i class="fas fa-desktop"></i> Projets</a></li>
         <li><a href="#contact"><i class="fas fa-paper-plane"></i> Contact</a></li>
-        <ul>
         <li class="lang-dropdown">
             <a href="javascript:void(0)" class="lang-btn">
                 <i class="fas fa-globe"></i> <span id="current-lang">FR</span>
@@ -1334,7 +1363,6 @@ footer {
                 <a href="javascript:void(0)" onclick="changeLanguage('en')">English</a>
             </div>
         </li>
-        </ul>
     </ul>
 </nav>
    <section class="home-section">
@@ -2002,63 +2030,168 @@ gsap.registerPlugin(ScrollTrigger);
 
 const horizontalContainer = document.querySelector(".projects-horizontal-container");
 
-if (horizontalContainer) {
+if (horizontalContainer && window.innerWidth > 1024) {
     gsap.to(horizontalContainer, {
         x: () => -(horizontalContainer.scrollWidth - document.documentElement.clientWidth + window.innerWidth * 0.2),
         ease: "none",
         scrollTrigger: {
             trigger: ".projects-section",
-            pin: true,           // Bloque le scroll vertical
-            scrub: 1,            // Synchronise avec le mouvement de la souris
+            pin: true,
+            scrub: 0,
             start: "top top",
-            end: () => "+=" + horizontalContainer.scrollWidth, // La zone de scroll dépend de la largeur
+            end: () => "+=" + horizontalContainer.scrollWidth,
             invalidateOnRefresh: true
         }
     });
 }
-(function() {
-    // Remplace par ton Public Key EmailJS
-    emailjs.init("TON_PUBLIC_KEY"); 
-})();
 
-document.getElementById('contact-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const btn = this.querySelector('button');
-    const status = document.getElementById('form-status');
-    
-    btn.innerHTML = "Envoi en cours...";
-    btn.disabled = true;
-
-    // Remplace "YOUR_SERVICE_ID" et "YOUR_TEMPLATE_ID"
-    emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', this)
-        .then(function() {
-            status.style.display = "block";
-            status.style.color = "#c770fe";
-            status.innerHTML = "Message envoyé avec succès !";
-            document.getElementById('contact-form').reset();
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Envoyer le message';
-            btn.disabled = false;
-        }, function(error) {
-            status.style.display = "block";
-            status.style.color = "#ff4d4d";
-            status.innerHTML = "Erreur lors de l'envoi...";
-            btn.disabled = false;
-        });
-});
 function changeLanguage(lang) {
-    const langDisplay = document.getElementById('current-lang');
-    langDisplay.innerText = lang.toUpperCase();
-    
-    if(lang === 'en') {
-        // Exemple de traduction manuelle pour les éléments clés
-        document.querySelector('.home-content h1').innerText = "Assitan Yayi";
-        document.querySelector('.home-description').innerText = "I'm a Web Developer with extensive experience for over 3 years...";
-        // Ajoute ici tes autres traductions
-        alert("Switching to English");
-    } else {
-        location.reload(); // Moyen le plus simple de revenir au français original
-    }
+    document.getElementById('current-lang').innerText = lang.toUpperCase();
+
+    const t = {
+        fr: {
+            nav: ["Accueil", "À propos", "Services", "Compétences", "Parcours", "Projets", "Contact"],
+            hero_h1: "Assitan Yayi Toure",
+            hero_h3: "And I'm a ",
+            hero_desc: "Étudiante en troisième année de Bachelor Informatique à l'ECE Paris, je me spécialise en <strong>Data et Intelligence Artificielle</strong>. Je suis actuellement à la recherche d'un stage de fin d'études de 4 à 6 mois à partir du 1er avril 2026.",
+            btn_cv: "Télécharger mon CV",
+            about_title: "À Propos de <span>Moi</span>",
+            about_stage: "Objectif Stage 2026",
+            about_stage_text: "Recherche d'un stage de fin d'études (4-6 mois) en Data & IA dès le 1er avril 2026.",
+            about_dispo: "Disponibilité : Avril - Septembre",
+            about_stack_label: "Expertise technique",
+            about_stack_title: "Mon Tech Stack",
+            about_passion: "Passion IA & Éthique",
+            about_collab: "On collabore ?",
+            about_collab_text: "Prête à mettre mes compétences au service de vos projets Data.",
+            btn_copy: "Copier l'email",
+            services_title: "Mes <span>Services</span>",
+            skills_title: "Langages de <span>Programmation</span>",
+            soft_title: "Mes <span>Soft Skills</span>",
+            exp_title: "Mon Parcours <span>Professionnel</span>",
+            projects_title: "Sélection de <span>projets récents</span>",
+            ambitions_title: "Mes <span>Ambitions</span> Futures",
+            contact_title: "Me <span>Contacter</span>",
+            contact_desc: "Je suis disponible pour discuter de votre projet ou d'une opportunité de stage.",
+        },
+        en: {
+            nav: ["Home", "About", "Services", "Skills", "Experience", "Projects", "Contact"],
+            hero_h1: "Assitan Yayi Toure",
+            hero_h3: "And I'm a ",
+            hero_desc: "Third-year Bachelor's student in Computer Science at ECE Paris, specializing in <strong>Data & Artificial Intelligence</strong>. Currently looking for a 4 to 6-month internship starting April 1st, 2026.",
+            btn_cv: "Download my CV",
+            about_title: "About <span>Me</span>",
+            about_stage: "Internship Goal 2026",
+            about_stage_text: "Looking for a final-year internship (4-6 months) in Data & AI starting April 1st, 2026.",
+            about_dispo: "Availability: April - September",
+            about_stack_label: "Technical expertise",
+            about_stack_title: "My Tech Stack",
+            about_passion: "AI & Ethics Passion",
+            about_collab: "Let's collaborate?",
+            about_collab_text: "Ready to put my skills at the service of your Data projects.",
+            btn_copy: "Copy email",
+            services_title: "My <span>Services</span>",
+            skills_title: "Programming <span>Languages</span>",
+            soft_title: "My <span>Soft Skills</span>",
+            exp_title: "My Professional <span>Journey</span>",
+            projects_title: "Selection of <span>recent projects</span>",
+            ambitions_title: "My Future <span>Ambitions</span>",
+            contact_title: "<span>Contact</span> Me",
+            contact_desc: "I'm available to discuss your project or an internship opportunity.",
+        }
+    };
+
+    const d = t[lang];
+
+    // Navbar
+    const navItems = document.querySelectorAll('.nav-links li a:not(.lang-btn)');
+    navItems.forEach((a, i) => {
+        if (d.nav[i]) {
+            const icon = a.querySelector('i');
+            a.innerHTML = '';
+            if (icon) a.appendChild(icon);
+            a.append(' ' + d.nav[i]);
+        }
+    });
+
+    // Hero
+    document.querySelector('.home-content h1').innerText = d.hero_h1;
+    document.querySelector('.home-description').innerHTML = d.hero_desc;
+    document.querySelector('.btn-cv').innerHTML = `<i class="fas fa-download"></i> ${d.btn_cv}`;
+
+    // About
+    document.querySelector('.about-section .sub-title').innerHTML = d.about_title;
+    document.querySelector('.btn-copy').innerHTML = `<i class="far fa-copy"></i> ${d.btn_copy}`;
+
+    // Titres sections
+    document.querySelector('.services .sub-title').innerHTML = d.services_title;
+    document.querySelector('.soft-skills-section .sub-title').innerHTML = d.soft_title;
+    document.querySelector('#experience .sub-title').innerHTML = d.exp_title;
+    document.querySelector('.projects-section .sub-title').innerHTML = d.projects_title;
+    document.querySelector('.ambitions-section .sub-title').innerHTML = d.ambitions_title;
+    document.querySelector('#contact .sub-title').innerHTML = d.contact_title;
+    document.querySelector('#contact > p').innerText = d.contact_desc;
 }
+// --- LOGIQUE DU MENU HAMBURGER ---
+const menuToggle = document.getElementById('mobile-menu');
+const navLinks = document.querySelector('.nav-links');
+
+// Ouvrir/Fermer le menu au clic sur l'icône
+menuToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('active');
+    
+    // Bonus : Changer l'icône de barre en "X" quand c'est ouvert
+    const icon = menuToggle.querySelector('i');
+    if (navLinks.classList.contains('active')) {
+        icon.classList.replace('fa-bars', 'fa-times');
+    } else {
+        icon.classList.replace('fa-times', 'fa-bars');
+    }
+});
+// --- DROPDOWN LANGUE (clic) ---
+const langDropdown = document.querySelector('.lang-dropdown');
+const langBtnToggle = document.querySelector('.lang-btn');
+
+langBtnToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    langDropdown.classList.toggle('open');
+});
+
+// Fermer si on clique ailleurs
+document.addEventListener('click', () => {
+    langDropdown.classList.remove('open');
+});
+// Fermer le menu automatiquement quand on clique sur un lien
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+        menuToggle.querySelector('i').classList.replace('fa-times', 'fa-bars');
+    });
+});
+// --- CONFIGURATION SCROLL REVEAL ---
+const sr = ScrollReveal({
+    origin: 'bottom',
+    distance: '60px',
+    duration: 2000,
+    delay: 200,
+    reset: false // false pour que l'animation ne se joue qu'une seule fois
+});
+
+// Apparition des titres de section
+sr.reveal('.sub-title', {});
+
+// Apparition des cartes de services et compétences (avec un délai entre chaque)
+sr.reveal('.services-box, .lang-item, .soft-skill-card', { interval: 100 });
+
+// Apparition du contenu de la section "À propos"
+sr.reveal('.about-section .bento-item', { interval: 150 });
+
+// Apparition des étapes du parcours professionnel
+sr.reveal('.timeline-item', { interval: 200 });
+
+// Apparition des cartes d'ambitions
+sr.reveal('.ambition-card', { interval: 200 });
+
     </script>
 </body>
 </html>
